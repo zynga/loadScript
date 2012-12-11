@@ -3,7 +3,7 @@
 	var
 		func,
 		funcName = 'loadScript',
-		VERSION = '0.1.0',
+		VERSION = '0.1.1',
 		had = Object.prototype.hasOwnProperty.call(win, funcName),
 		previous = win[funcName],
 		loading = {},
@@ -18,6 +18,13 @@
 	}
 
 	function rewrite(origURL) {
+		if (!substitutions) {
+			try {
+				substitutions = JSON.parse(localStorage.getItem(func.key)) || [];
+			} catch (ex) {
+				substitutions = [];
+			}
+		}
 		var i, len = substitutions.length, rule, url = origURL;
 		while (++i < len) {
 			rule = substitutions[i];
@@ -71,7 +78,7 @@
 
 	func.VERSION = VERSION;
 
-	func.key = 'loader_rules';
+	func.key = 'loadScript_substitutions';
 
 	func.noConflict = function () {
 		if (win[name] === func) {
