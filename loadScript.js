@@ -1,14 +1,23 @@
 /*global console*/
+//
+// loadScript() is a global function for performing asynchronous script loads.
+//
+// Features:
+//  - Tiny! (< 1K minified)
+//  - Supports .noConflict()
+//  - For developers, allows you to rewrite script URLs based on localStorage
+//    string substitution rules, making it easy to develop a new version of your
+//    JS products, even working off of a production site!
+//
 (function (win, doc, undef) {
 	var
 		func,
 		funcName = 'loadScript',
-		VERSION = '0.1.1',
+		VERSION = '0.1.2',
 		had = Object.prototype.hasOwnProperty.call(win, funcName),
 		previous = win[funcName],
 		loading = {},
-		loaded = {},
-		substitutions
+		loaded = {}
 	;
 
 	function log(msg) {
@@ -17,15 +26,29 @@
 		}
 	}
 
+	// Perform text substitutions on `origURL` according to the substitution
+	// rules stored in localStorage `key` (if present).  This is a developer
+	// feature; to use it, you must name the localStorage key by setting it like
+	// this:
+	//
+	//   loadScript.key = 'loader_rules';
+	//
+	// Then you can set the corresponding value in localStorage to a JSON-ified
+	// array of arrays, where each inner array is a pair of the form:
+	//
+	//   [searchtext, replacetext]
+	//
+	// This allows the developer to load, for instance, a newer or unminified
+	// version of a particular script.
 	function rewrite(origURL) {
-		if (!substitutions) {
+		var substitutions = [], key = func.key;
+		if (key) {
 			try {
-				substitutions = JSON.parse(localStorage.getItem(func.key)) || [];
+				substitutions = JSON.parse(localStorage.getItem(key)) || [];
 			} catch (ex) {
-				substitutions = [];
 			}
 		}
-		var i, len = substitutions.length, rule, url = origURL;
+		var i = -1, len = substitutions.length, rule, url = origURL;
 		while (++i < len) {
 			rule = substitutions[i];
 			url = url.replace(rule[0], rule[1]);
@@ -37,6 +60,7 @@
 		return url;
 	}
 
+	// Here is the loadScript() function itself.
 	func = win[funcName] = function (requestURL, callback) {
 		var
 			el,
@@ -55,6 +79,7 @@
 		}
 		q.push(doCallback);
 		function onLoad() {
+			loaded[url] = 1;
 			while (q.length) {
 				q.shift()();
 			}
@@ -78,18 +103,16 @@
 
 	func.VERSION = VERSION;
 
-	func.key = 'loadScript_substitutions';
-
 	func.noConflict = function () {
-		if (win[name] === func) {
-			win[name] = had ? previous : undef;
+		if (win[funcName] === func) {
+			win[funcName] = had ? previous : undef;
 			if (!had) {
 				try {
-					delete win[name];
+					delete win[funcName];
 				} catch (ex) {
 				}
 			}
 		}
 		return func;
 	};
-}(window, document));
+}(this, document));

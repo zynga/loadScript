@@ -6,21 +6,87 @@
 
 <script src="loadScript.js" type="text/javascript"></script>
 <script type="text/javascript">
-loadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js', function () {
-	var
-		$ = jQuery.noConflict(),
-		body = $(document.body).empty(),
-		success = true
-	;
-	function log(msg) {
-		$('<div class="entry"></div>').append(msg).appendTo(body);
-	}
-	log(success ? 'All tests passed.' : 'Not all tests passed. :(');
-});
-</script>
 
+var atomJS = 'https://raw.github.com/zynga/atom/master/atom.js' ;
+loadScript(atomJS, function () {
+	var
+		a = atom.create(),
+		jqURL = 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js',
+		key = loadScript.key = 'loader_rules',
+		modern = typeof localStorage !== 'undefined' && typeof JSON !== 'undefined',
+		once = a.once,
+		set = a.set
+	;
+
+	// If localStorage exists, use it to override a URL
+	if (modern) {
+		localStorage.setItem(key, JSON.stringify([['xyz', jqURL]]));
+		jqURL = 'xyz';
+	}
+
+	var firstJQcallback;
+	loadScript(jqURL, function () {
+		firstJQcallback = true;
+	});
+	loadScript(jqURL, function () {
+		var
+			$ = jQuery.noConflict(),
+			body = $(document.body).empty(),
+			myLoadScript,
+			success = true
+		;
+
+		function log(msg, err) {
+			$('<div class="entry' + (err && ' error') + '"></div>').append(msg).appendTo(body);
+		}
+		function err(msg) {
+			log(msg, 1);
+			success = false;
+		}
+
+		log('Loaded atom.js.');
+
+		// Indicate whether jQuery was loaded via localStorage substitution.
+		if (modern) {
+			log('Loaded jQuery using a localStorage substitution.');
+		} else {
+			log('localStorage not available, so skipping substitution test.');
+			log('Loaded jQuery.');
+		}
+
+		// Test that the first callback waiting for jqURL actually got called
+		// first.
+		if (firstJQcallback) {
+			log('First callback got called first.');
+		} else {
+			err('First callback did NOT get called first.');
+		}
+
+		// Test that noConflict() works.
+		myLoadScript = loadScript.noConflict();
+		if (typeof loadScript === 'undefined') {
+			log('noConflict() works.');
+		} else {
+			err('noConflict() did not remove global ref!');
+		}
+
+		// Test that loading atom.js again will execute the callback *immediately*
+		var reloadImmediate;
+		myLoadScript(atomJS, function () {
+			reloadImmediate = true;
+		});
+		if (reloadImmediate) {
+			log('Re-loading of atom.js was immediate.');
+		} else {
+			err('Re-loading of atom.js was NOT immediate.');
+		}
+
+		log(success ? 'All tests passed.' : 'Not all tests passed. :(', !success);
+	});
+});
+
+</script>
+<style type="text/css">.error { color: #D04; }</style>
 </head>
-<body>
-If this message remains, then loadScript() wasn't able to load jQuery. :(
-</body>
+<body>If this message remains, then loadScript() wasn't able to load jQuery. :(</body>
 </html>
