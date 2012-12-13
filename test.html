@@ -37,7 +37,7 @@ loadScript(atomJS, function () {
 		;
 
 		function log(msg, err) {
-			$('<div class="entry' + (err && ' error') + '"></div>').append(msg).appendTo(body);
+			$('<div class="entry' + (err ? ' error' : '') + '"></div>').append(msg).appendTo(body);
 		}
 		function err(msg) {
 			log(msg, 1);
