@@ -11,9 +11,9 @@
 //
 (function (win, doc, undef) {
 	var
-		func,
+		loadScript,
 		funcName = 'loadScript',
-		VERSION = '0.1.3',
+		VERSION = '0.1.4',
 		had = Object.prototype.hasOwnProperty.call(win, funcName),
 		previous = win[funcName],
 		loading = {},
@@ -41,7 +41,7 @@
 	// This allows the developer to load, for instance, a newer or unminified
 	// version of a particular script.
 	function rewrite(origURL) {
-		var substitutions = [], key = func.key;
+		var substitutions = [], key = loadScript.key;
 		if (key) {
 			try {
 				substitutions = JSON.parse(localStorage.getItem(key)) || [];
@@ -61,7 +61,7 @@
 	}
 
 	// Here is the loadScript() function itself.
-	func = win[funcName] = function (requestURL, callback) {
+	loadScript = win[funcName] = function (requestURL, callback) {
 		var
 			el,
 			url = rewrite(requestURL),
@@ -101,10 +101,10 @@
 		}
 	};
 
-	func.VERSION = VERSION;
+	loadScript.VERSION = VERSION;
 
-	func.noConflict = function () {
-		if (win[funcName] === func) {
+	loadScript.noConflict = function () {
+		if (win[funcName] === loadScript) {
 			win[funcName] = had ? previous : undef;
 			if (!had) {
 				try {
@@ -113,6 +113,6 @@
 				}
 			}
 		}
-		return func;
+		return loadScript;
 	};
 }(this, document));
