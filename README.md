@@ -1,13 +1,13 @@
 Overview
 ========
 
-loadScript() is a global function for performing asynchronous script loads.
+`loadScript()` is a global function for performing asynchronous script loads.
 
 
 Features
 ========
 
- * Tiny! (< 1K minified)
+ * Tiny! (1kB minified)
  * Supports .noConflict()
  * For developers, allows you to rewrite script URLs based on localStorage
    string substitution rules, making it easy to develop a new version of your
