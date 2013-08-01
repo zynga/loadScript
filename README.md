@@ -3,6 +3,7 @@ Overview
 
 `loadScript()` is a global function for performing asynchronous script loads.
 
+[Run unit tests.](http://zynga.github.io/loadScript/test.html)
 
 Features
 ========
