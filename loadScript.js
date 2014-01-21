@@ -8,10 +8,12 @@
 // License: BSD
 //
 (function (win, doc, undef) {
+	'use script';
+
 	var
 		loadScript,
 		funcName = 'loadScript',
-		VERSION = '0.1.4',
+		VERSION = '0.1.5',
 		had = Object.prototype.hasOwnProperty.call(win, funcName),
 		previous = win[funcName],
 		loading = {},
